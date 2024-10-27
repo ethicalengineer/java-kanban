@@ -4,16 +4,19 @@ import java.util.Objects;
 
 public class Task {
 
-    private final long id;
+    private long id;
     private String name;
     private String description;
     private Status status;
 
-    public Task(long id, String name, String description, Status status) {
-        this.id = id;
+    public Task(String name, String description, Status status) {
         this.name = name;
         this.description = description;
         this.status = status;
+    }
+
+    public void setId(long id) {
+        this.id = id;
     }
 
     public long getId() {
@@ -55,7 +58,7 @@ public class Task {
 
     @Override
     public String toString() {
-        return "Task{" +
+        return this.getClass() + "{" +
                 "id=" + id +
                 ", name='" + name + '\'' +
                 ", description='" + description + '\'' +

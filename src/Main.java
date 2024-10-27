@@ -1,126 +1,120 @@
-import controller.EpicManager;
-import controller.SubTaskManager;
-import controller.TaskManager;
-import model.Epic;
-import model.Status;
-import model.SubTask;
+import controller.Manager;
 import model.Task;
+import model.Epic;
+import model.SubTask;
+import model.Status;
 
 public class Main {
-    private static long id = 0;
-
     public static void main(String[] args) {
+        Manager manager = new Manager();
 
-        TaskManager taskManager = new TaskManager();
-        EpicManager epicManager = new EpicManager();
-        SubTaskManager subTaskManager = new SubTaskManager(epicManager);
-
-        taskManager.addTask(new Task(getNewId(), "Полить цветы", "В гостиной и на кухне", Status.NEW));
-        taskManager.addTask(new Task(getNewId(), "Прочитать задачу", "Я.Практикум", Status.IN_PROGRESS));
-        taskManager.addTask(new Task(getNewId(), "Купить воду", "Из Я.Лавки Nestle", Status.NEW));
-        taskManager.addTask(new Task(getNewId(), "Заплатить за ЖКХ", "10 000 р", Status.NEW));
-        taskManager.addTask(new Task(getNewId(), "Выспаться", "Почти невозможно", Status.IN_PROGRESS));
-        taskManager.addTask(new Task(getNewId(), "Написать код", "Средней паршивости", Status.DONE));
+        manager.addTask(new Task("Полить цветы", "В гостиной и на кухне", Status.NEW));
+        manager.addTask(new Task("Прочитать задачу", "Я.Практикум", Status.IN_PROGRESS));
+        manager.addTask(new Task("Купить воду", "Из Я.Лавки Nestle", Status.NEW));
+        manager.addTask(new Task("Заплатить за ЖКХ", "10 000 р", Status.NEW));
+        manager.addTask(new Task("Выспаться", "Почти невозможно", Status.IN_PROGRESS));
+        manager.addTask(new Task("Написать код", "Средней паршивости", Status.DONE));
 
         System.out.println("-".repeat(20));
-        System.out.println(taskManager.getAllTasks());
+        System.out.println(manager.getAllTasks());
         System.out.println("-".repeat(20));
-        System.out.println(taskManager.getTaskById(1));
+        System.out.println(manager.getTaskById(1));
 
-        taskManager.updateTask(new Task(1, "Полить все цветы", "Во всей квартире", Status.IN_PROGRESS));
-
-        System.out.println("-".repeat(20));
-        System.out.println(taskManager.getTaskById(1));
-
-        taskManager.removeTaskById(1);
+        Task updatedTask = manager.getTaskById(1);
+        updatedTask.setStatus(Status.IN_PROGRESS);
+        manager.updateTask(updatedTask);
 
         System.out.println("-".repeat(20));
-        System.out.println(taskManager.getAllTasks());
+        System.out.println(manager.getTaskById(1));
 
-        taskManager.removeAllTasks();
-
-        System.out.println("-".repeat(20));
-        System.out.println(taskManager.getAllTasks());
-
-        epicManager.addEpic(new Epic(getNewId(), "Бизнес-план Гномов", "Как подзаработать"));
-        epicManager.addEpic(new Epic(getNewId(), "Купить в ВВ", "Список покупок"));
+        manager.removeTaskById(1);
 
         System.out.println("-".repeat(20));
-        System.out.println(epicManager.getAllEpics());
+        System.out.println(manager.getAllTasks());
 
-        subTaskManager.addSubTask(new SubTask(getNewId(), "Украсть трусы", "План", 7, Status.NEW));
-        subTaskManager.addSubTask(new SubTask(getNewId(), "???", "Nobody Knows", 7, Status.NEW));
-        subTaskManager.addSubTask(new SubTask(getNewId(), "Получить прибыль", "План", 7, Status.NEW));
-        subTaskManager.addSubTask(new SubTask(getNewId(), "Молоко", "К покупке", 8, Status.DONE));
+        manager.removeAllTasks();
 
         System.out.println("-".repeat(20));
-        System.out.println(subTaskManager.getAllSubTasks());
+        System.out.println(manager.getAllTasks());
+
+        manager.addEpic(new Epic("Бизнес-план Гномов", "Как подзаработать"));
+        manager.addEpic(new Epic("Купить в ВВ", "Список покупок"));
 
         System.out.println("-".repeat(20));
-        System.out.println(epicManager.getEpicById(7));
-        System.out.println(epicManager.getAllSubTasksByEpicId(7));
+        System.out.println(manager.getAllEpics());
+
+        manager.addSubTask(new SubTask("Украсть трусы", "План", 7, Status.NEW));
+        manager.addSubTask(new SubTask("???", "Nobody Knows", 7, Status.NEW));
+        manager.addSubTask(new SubTask("Получить прибыль", "План", 7, Status.NEW));
+        manager.addSubTask(new SubTask("Молоко", "К покупке", 8, Status.DONE));
 
         System.out.println("-".repeat(20));
-        System.out.println(epicManager.getEpicById(8));
-        System.out.println(epicManager.getAllSubTasksByEpicId(8));
-
-        subTaskManager.addSubTask(new SubTask(getNewId(), "Кефир", "К покупке", 8, Status.NEW));
+        System.out.println(manager.getAllSubTasks());
 
         System.out.println("-".repeat(20));
-        System.out.println(epicManager.getEpicById(8));
-        System.out.println(epicManager.getAllSubTasksByEpicId(8));
-
-        epicManager.getEpicById(8).removeAllSubTasks();
+        System.out.println(manager.getEpicById(7));
+        System.out.println(manager.getAllSubTasksByEpicId(7));
 
         System.out.println("-".repeat(20));
-        System.out.println(epicManager.getEpicById(8));
-        System.out.println(epicManager.getAllSubTasksByEpicId(8));
+        System.out.println(manager.getEpicById(8));
+        System.out.println(manager.getAllSubTasksByEpicId(8));
 
-        epicManager.removeEpicById(8);
-
-        System.out.println("-".repeat(20));
-        System.out.println(epicManager.getAllEpics());
-
-        subTaskManager.updateSubTask(new SubTask(
-                10,
-                "Продать трусы",
-                "Разобрались",
-                7, Status.DONE)
-        );
+        manager.addSubTask(new SubTask("Кефир", "К покупке", 8, Status.NEW));
 
         System.out.println("-".repeat(20));
-        System.out.println(epicManager.getEpicById(7));
-        System.out.println(epicManager.getAllSubTasksByEpicId(7));
+        System.out.println(manager.getEpicById(8));
+        System.out.println(manager.getAllSubTasksByEpicId(8));
 
-        subTaskManager.updateSubTask(new SubTask(9, "Украсть трусы", "План", 7, Status.DONE));
-        subTaskManager.updateSubTask(new SubTask(11, "Получить прибыль", "План", 7, Status.DONE));
-
-        System.out.println("-".repeat(20));
-        System.out.println(epicManager.getEpicById(7));
-        System.out.println(epicManager.getAllSubTasksByEpicId(7));
-
-        subTaskManager.removeSubTaskById(10);
+        manager.removeSubTaskById(12);
+        manager.removeSubTaskById(13);
 
         System.out.println("-".repeat(20));
-        System.out.println(epicManager.getEpicById(7));
-        System.out.println(epicManager.getAllSubTasksByEpicId(7));
+        System.out.println(manager.getEpicById(8));
+        System.out.println(manager.getAllSubTasksByEpicId(8));
 
-        subTaskManager.removeAllSubTasks();
-        epicManager.getAllSubTasksByEpicId(7);
+        // Тут заваливаемся
+        manager.removeEpicById(8);
 
         System.out.println("-".repeat(20));
-        System.out.println(epicManager.getEpicById(7));
-        System.out.println(epicManager.getAllSubTasksByEpicId(7));
+        System.out.println(manager.getAllEpics());
 
-        epicManager.removeAllEpics();
+        SubTask updatedSubTask = manager.getSubTaskById(10);
+        updatedSubTask.setName("Продать трусы");
+        updatedSubTask.setDescription("Разобрались");
+        updatedSubTask.setStatus(Status.DONE);
+        manager.updateSubTask(updatedSubTask);
+
         System.out.println("-".repeat(20));
-        System.out.println(epicManager.getAllEpics());
+        System.out.println(manager.getEpicById(7));
+        System.out.println(manager.getAllSubTasksByEpicId(7));
 
-    }
+        updatedSubTask = manager.getSubTaskById(9);
+        updatedSubTask.setStatus(Status.DONE);
+        manager.updateSubTask(updatedSubTask);
+        updatedSubTask = manager.getSubTaskById(11);
+        updatedSubTask.setStatus(Status.DONE);
+        manager.updateSubTask(updatedSubTask);
 
-    // Генератор ID
-    private static long getNewId() {
-        id++;
-        return id;
+        System.out.println("-".repeat(20));
+        System.out.println(manager.getEpicById(7));
+        System.out.println(manager.getAllSubTasksByEpicId(7));
+
+        manager.removeSubTaskById(10);
+
+        System.out.println("-".repeat(20));
+        System.out.println(manager.getEpicById(7));
+        System.out.println(manager.getAllSubTasksByEpicId(7));
+
+        manager.removeAllSubTasks();
+        manager.getAllSubTasksByEpicId(7);
+
+        System.out.println("-".repeat(20));
+        System.out.println(manager.getEpicById(7));
+        System.out.println(manager.getAllSubTasksByEpicId(7));
+
+        manager.removeAllEpics();
+        System.out.println("-".repeat(20));
+        System.out.println(manager.getAllEpics());
+
     }
 }
