@@ -26,6 +26,9 @@ public class InMemoryTaskManager implements TaskManager {
 
     @Override
     public void removeAllTasks() {
+        for (Long taskId : tasks.keySet()) {
+            history.remove(taskId);
+        }
         tasks.clear();
     }
 
@@ -50,6 +53,7 @@ public class InMemoryTaskManager implements TaskManager {
 
     @Override
     public void removeTaskById(long id) {
+        history.remove(id);
         tasks.remove(id);
     }
 
@@ -62,6 +66,9 @@ public class InMemoryTaskManager implements TaskManager {
 
     @Override
     public void removeAllSubTasks() {
+        for (Long subTaskId : subTasks.keySet()) {
+            history.remove(subTaskId);
+        }
         subTasks.clear();
 
         for (Epic updatedEpic : epics.values()) {
@@ -99,6 +106,7 @@ public class InMemoryTaskManager implements TaskManager {
         Epic updatedEpic = getEpicById(getSubTaskById(id).getEpicId());
         updatedEpic.removeSubTask(id);
         updateEpic(updatedEpic);
+        history.remove(id);
         subTasks.remove(id);
     }
 
@@ -111,8 +119,11 @@ public class InMemoryTaskManager implements TaskManager {
 
     @Override
     public void removeAllEpics() {
+        for (Long epicId : epics.keySet()) {
+            history.remove(epicId);
+        }
         epics.clear();
-        subTasks.clear();
+        removeAllSubTasks();
     }
 
     @Override
@@ -138,9 +149,10 @@ public class InMemoryTaskManager implements TaskManager {
     public void removeEpicById(long id) {
         Epic removedEpic = getEpicById(id);
         for (SubTask subTask : removedEpic.getSubTasks()) {
-            removeSubTaskById(subTask.getId());
+            history.remove(subTask.getId());
+            subTasks.remove(subTask.getId());
         }
-
+        history.remove(id);
         epics.remove(id);
     }
 
@@ -154,5 +166,9 @@ public class InMemoryTaskManager implements TaskManager {
     private long getNewId() {
         id++;
         return id;
+    }
+
+    public HistoryManager getHistory() {
+        return history;
     }
 }
