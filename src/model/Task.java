@@ -8,11 +8,20 @@ public class Task {
     private String name;
     private String description;
     private Status status;
+    private final Type type;
 
     public Task(String name, String description, Status status) {
         this.name = name;
         this.description = description;
         this.status = status;
+        this.type = Type.TASK;
+    }
+
+    public Task(String name, String description, Status status, Type type) {
+        this.name = name;
+        this.description = description;
+        this.status = status;
+        this.type = type;
     }
 
     public void setId(long id) {
@@ -62,11 +71,6 @@ public class Task {
 
     @Override
     public String toString() {
-        return this.getClass() + "{" +
-                "id=" + id +
-                ", name='" + name + '\'' +
-                ", description='" + description + '\'' +
-                ", status=" + status +
-                '}';
+        return id + "," + type + "," + name + "," + status + "," + description;
     }
 }
