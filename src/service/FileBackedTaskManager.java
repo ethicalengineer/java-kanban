@@ -33,6 +33,7 @@ public class FileBackedTaskManager extends InMemoryTaskManager implements TaskMa
         super.removeTaskById(id);
         save();
     }
+
     @Override
     public void removeAllTasks() {
         super.removeAllTasks();
