@@ -1,5 +1,6 @@
 package service;
 
+import exception.ManagerLoadException;
 import exception.ManagerSaveException;
 import model.*;
 
@@ -109,8 +110,8 @@ public class FileBackedTaskManager extends InMemoryTaskManager implements TaskMa
         }
     }
 
-    public static FileBackedTaskManager loadFromFile(String fileName) {
-        FileBackedTaskManager fileBackedTaskManager = new FileBackedTaskManager(fileName);
+    public static TaskManager loadFromFile(String fileName) throws ManagerLoadException {
+        TaskManager fileBackedTaskManager = Managers.getDefault(fileName);
         List<Map<String, String>> inMemoryTasks = new ArrayList<>();
         boolean isFirstLine = true;
 
@@ -133,7 +134,7 @@ public class FileBackedTaskManager extends InMemoryTaskManager implements TaskMa
                 inMemoryTasks.add(taskComponents);
             }
         } catch (IOException e) {
-            System.out.println("Произошла ошибка во время чтения файла.");
+            throw new ManagerLoadException(e.getMessage());
         }
 
         for (Map<String, String> task : inMemoryTasks) {

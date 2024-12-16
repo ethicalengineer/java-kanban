@@ -26,7 +26,7 @@ public class FileBackedTaskManagerTest {
 
     @BeforeEach
     void beforeEach() {
-        manager = Managers.getFileBackedTaskManager(TEST_FILE);
+        manager = Managers.getDefault(TEST_FILE);
     }
 
     @AfterEach

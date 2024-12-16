@@ -17,7 +17,7 @@ class ManagersTest {
 
     @Test
     void getInMemoryTaskManager() {
-        TaskManager manager = Managers.getDefault();
+        TaskManager manager = Managers.getInMemoryTaskManager();
         manager.addTask(new Task("Полить цветы", "В гостиной и на кухне", Status.NEW));
         assertEquals(1, manager.getTaskById(1).getId());
     }
@@ -33,7 +33,7 @@ class ManagersTest {
 
     @Test
     void getFileBackedTaskManager() {
-        TaskManager manager = Managers.getFileBackedTaskManager(TEST_FILE);
+        TaskManager manager = Managers.getDefault(TEST_FILE);
         manager.addTask(new Task("Полить цветы", "В гостиной и на кухне", Status.NEW));
         assertEquals("[1,TASK,Полить цветы,NEW,В гостиной и на кухне]", manager.getAllTasks().toString());
     }

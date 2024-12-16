@@ -9,7 +9,7 @@ public class Main {
 
         final String TEST_FILE = "backend.txt";
 
-        TaskManager manager = Managers.getFileBackedTaskManager(TEST_FILE);
+        TaskManager manager = Managers.getDefault(TEST_FILE);
         manager.addTask(new Task("Задача 1", "Описание задачи 1", Status.NEW));
         manager.addEpic(new Epic("Эпик 1", "Описание эпика 1"));
         manager.addSubTask(new SubTask("Подзадача 1", "Описание подзадачи 1", 2, Status.NEW));
