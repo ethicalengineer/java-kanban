@@ -13,7 +13,7 @@ public class InMemoryHistoryManagerTest {
 
     @BeforeEach
     void beforeEach() {
-        manager = Managers.getDefault();
+        manager = Managers.getInMemoryTaskManager();
     }
 
     @Test
