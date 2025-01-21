@@ -1,26 +1,36 @@
 package model;
 
+import java.time.Duration;
+import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
 import java.util.Objects;
 
 public class Task {
+    public static final DateTimeFormatter DATE_TIME_FORMATTER = DateTimeFormatter.ofPattern("HH:mm dd.MM.yyyy");
 
     private long id;
     private String name;
     private String description;
     private Status status;
     private final Type type;
+    private LocalDateTime startTime;
+    private Duration duration;
 
-    public Task(String name, String description, Status status) {
+    public Task(String name, String description, Status status, LocalDateTime startTime, Duration duration) {
         this.name = name;
         this.description = description;
         this.status = status;
+        this.startTime = startTime;
+        this.duration = duration;
         this.type = Type.TASK;
     }
 
-    public Task(String name, String description, Status status, Type type) {
+    public Task(String name, String description, Status status, Type type, LocalDateTime startTime, Duration duration) {
         this.name = name;
         this.description = description;
         this.status = status;
+        this.startTime = startTime;
+        this.duration = duration;
         this.type = type;
     }
 
@@ -44,6 +54,8 @@ public class Task {
         return status;
     }
 
+    public Duration getDuration() { return duration; }
+
     public void setName(String name) {
         this.name = name;
     }
@@ -54,6 +66,22 @@ public class Task {
 
     public void setStatus(Status status) {
         this.status = status;
+    }
+
+    public void setDuration(Duration duration) {
+        this.duration = duration;
+    }
+
+    public void setStartTime(LocalDateTime startTime) {
+        this.startTime = startTime;
+    }
+
+    public LocalDateTime getEndTime() {
+        return startTime.plus(duration);
+    }
+
+    public LocalDateTime getStartTime() {
+        return startTime;
     }
 
     @Override
@@ -69,8 +97,17 @@ public class Task {
         return Objects.hashCode(id);
     }
 
+    // new toString() id, type, name, description, status, startTime, duration, endTime, epicId
     @Override
     public String toString() {
-        return id + "," + type + "," + name + "," + status + "," + description;
+        return id + "," +
+                type + "," +
+                name + "," +
+                description + "," +
+                status + "," +
+                startTime.format(DATE_TIME_FORMATTER) + "," +
+                duration.toMinutes() + "," +
+                getEndTime().format(DATE_TIME_FORMATTER) + "," +
+                ",";
     }
 }
