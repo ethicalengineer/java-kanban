@@ -54,6 +54,7 @@ public class InMemoryTaskManager implements TaskManager {
 
     @Override
     public void updateTask(Task task) {
+        prioritizedTasks.remove(tasks.get(task.getId()));
         tasks.put(task.getId(), task);
         if (task.getStartTime() != null) {
             prioritizedTasks.add(task);
@@ -116,6 +117,7 @@ public class InMemoryTaskManager implements TaskManager {
         Epic updatedEpic = getEpicById(subTask.getEpicId());
         updatedEpic.updateSubTask(subTask);
         updateEpic(updatedEpic);
+        prioritizedTasks.remove(subTasks.get(subTask.getId()));
         subTasks.put(subTask.getId(), subTask);
         if (subTask.getStartTime() != null) {
             prioritizedTasks.add(subTask);
@@ -143,6 +145,7 @@ public class InMemoryTaskManager implements TaskManager {
 
     @Override
     public void removeAllEpics() {
+        subTasks.values().stream().peek(prioritizedTasks::remove).close();
         epics.keySet().stream().peek(history::remove).close();
         epics.clear();
         removeAllSubTasks();
@@ -171,6 +174,7 @@ public class InMemoryTaskManager implements TaskManager {
     public void removeEpicById(long id) {
         Epic removedEpic = getEpicById(id);
         removedEpic.getSubTasks().stream().peek(subTask -> {
+            prioritizedTasks.remove(subTask);
             history.remove(subTask.getId());
             subTasks.remove(subTask.getId());
         }).close();
@@ -196,14 +200,14 @@ public class InMemoryTaskManager implements TaskManager {
     }
 
     boolean isValidDataRange(Task task) {
-        if (!prioritizedTasks.isEmpty()) {
-            for (Task priotirizedTask : prioritizedTasks) {
-                if (task.getEndTime().isAfter(priotirizedTask.getStartTime())
-                        && priotirizedTask.getEndTime().isAfter(task.getStartTime())) {
-                    return false;
-                }
-            }
+        if (prioritizedTasks.isEmpty()) {
             return true;
+        }
+        for (Task priotirizedTask : prioritizedTasks) {
+            if (task.getEndTime().isAfter(priotirizedTask.getStartTime())
+                    && priotirizedTask.getEndTime().isAfter(task.getStartTime())) {
+                return false;
+            }
         }
         return true;
     }
