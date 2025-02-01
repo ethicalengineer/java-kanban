@@ -1,14 +1,20 @@
 package model;
 
+import java.time.Duration;
+import java.time.LocalDateTime;
 import java.util.ArrayList;
+import java.util.Comparator;
+import java.util.NoSuchElementException;
 
 public class Epic extends Task {
 
     private final ArrayList<SubTask> subTasks;
+    private LocalDateTime endTime;
 
-    public Epic(String name, String description) {
-        super(name, description, Status.NEW, Type.EPIC);
+    public Epic(String name, String description, LocalDateTime startTime) {
+        super(name, description, Status.NEW, Type.EPIC, startTime, Duration.ZERO);
         subTasks = new ArrayList<>();
+        endTime = startTime.plus(Duration.ZERO);
     }
 
     public ArrayList<SubTask> getSubTasks() {
@@ -18,6 +24,7 @@ public class Epic extends Task {
     public void addSubTask(SubTask subTask) {
         subTasks.add(subTask);
         changeEpicStatus();
+        changeEpicEstimations();
     }
 
     public void updateSubTask(SubTask subTask) {
@@ -26,6 +33,7 @@ public class Epic extends Task {
                 subTasks.remove(i);
                 subTasks.add(i, subTask);
                 changeEpicStatus();
+                changeEpicEstimations();
                 return;
             }
         }
@@ -36,6 +44,7 @@ public class Epic extends Task {
             if (subTasks.get(i).getId() == id) {
                 subTasks.remove(i);
                 changeEpicStatus();
+                changeEpicEstimations();
                 return;
             }
         }
@@ -44,9 +53,10 @@ public class Epic extends Task {
     public void removeAllSubTasks() {
         subTasks.clear();
         changeEpicStatus();
+        changeEpicEstimations();
     }
 
-    public void changeEpicStatus() {
+    private void changeEpicStatus() {
         int doneSubTasksCounter = 0;
         int newSubTasksCounter = 0;
 
@@ -68,5 +78,40 @@ public class Epic extends Task {
         } else {
             this.setStatus(Status.IN_PROGRESS);
         }
+    }
+
+    private void changeEpicEstimations() {
+        super.setDuration(calculateDuration());
+
+        if (!subTasks.isEmpty()) {
+            setStartTime(calculateEpicStartTime());
+            endTime = calculateEpicEndTime();
+        }
+    }
+
+    private Duration calculateDuration() {
+        return subTasks.stream().map(Task::getDuration).reduce(Duration.ZERO, Duration::plus);
+    }
+
+    private LocalDateTime calculateEpicStartTime() throws NoSuchElementException {
+        return subTasks.stream().map(SubTask::getStartTime).min(Comparator.naturalOrder()).orElseThrow();
+    }
+
+    private LocalDateTime calculateEpicEndTime() throws NoSuchElementException {
+        return subTasks.stream().map(SubTask::getEndTime).max(Comparator.naturalOrder()).orElseThrow();
+    }
+
+    // new toString() id, type, name, description, status, startTime, duration, endTime, epicId
+    @Override
+    public String toString() {
+        return super.getId() + "," +
+                Type.EPIC + "," +
+                super.getName() + "," +
+                super.getDescription() + "," +
+                super.getStatus() + "," +
+                super.getStartTime().format(DATE_TIME_FORMATTER) + "," +
+                super.getDuration().toMinutes() + "," +
+                endTime.format(DATE_TIME_FORMATTER) + "," +
+                ",";
     }
 }

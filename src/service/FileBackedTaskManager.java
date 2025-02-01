@@ -5,10 +5,11 @@ import exception.ManagerSaveException;
 import model.*;
 
 import java.io.*;
+import java.time.Duration;
+import java.time.LocalDateTime;
 import java.util.*;
 
 public class FileBackedTaskManager extends InMemoryTaskManager implements TaskManager {
-
     String fileName;
 
     public FileBackedTaskManager(String fileName) {
@@ -93,9 +94,15 @@ public class FileBackedTaskManager extends InMemoryTaskManager implements TaskMa
         save();
     }
 
+    @Override
+    public List<Task> getPrioritizedTasks() {
+        return super.getPrioritizedTasks();
+    }
+
+    // new toString() id, type, name, description, status, startTime, duration, endTime, epicId
     public void save() throws ManagerSaveException {
         try (FileWriter fileWriter = new FileWriter(fileName)) {
-            fileWriter.write("id,type,name,status,description,epic\n");
+            fileWriter.write("id,type,name,description,status,startTime,duration,endTime,epicId,\n");
             for (Task task : super.getAllTasks()) {
                 fileWriter.write(task.toString() + "\n");
             }
@@ -140,14 +147,21 @@ public class FileBackedTaskManager extends InMemoryTaskManager implements TaskMa
         for (Map<String, String> task : inMemoryTasks) {
             switch (task.get("type").toLowerCase()) {
                 case "task": {
-                    Task createdTask = new Task(task.get("name"), task.get("description"),
-                            Status.valueOf(task.get("status")));
+                    Task createdTask = new Task(
+                            task.get("name"),
+                            task.get("description"),
+                            Status.valueOf(task.get("status")),
+                            LocalDateTime.parse(task.get("startTime"), Task.DATE_TIME_FORMATTER),
+                            Duration.ofMinutes(Long.parseLong(task.get("duration"))));
                     createdTask.setId(Long.parseLong(task.get("id")));
                     fileBackedTaskManager.addTask(createdTask);
                     break;
                 }
                 case "epic": {
-                    Epic createdEpic = new Epic(task.get("name"), task.get("description"));
+                    Epic createdEpic = new Epic(
+                            task.get("name"),
+                            task.get("description"),
+                            LocalDateTime.parse(task.get("startTime"), Task.DATE_TIME_FORMATTER));
                     createdEpic.setId(Long.parseLong(task.get("id")));
                     fileBackedTaskManager.addEpic(createdEpic);
                     break;
@@ -160,8 +174,13 @@ public class FileBackedTaskManager extends InMemoryTaskManager implements TaskMa
 
         for (Map<String, String> subTask : inMemoryTasks) {
             if (subTask.get("type").equalsIgnoreCase("subtask")) {
-                SubTask createdSubTask = new SubTask(subTask.get("name"), subTask.get("description"),
-                        Long.parseLong(subTask.get("epic")), Status.valueOf(subTask.get("status")));
+                SubTask createdSubTask = new SubTask(
+                        subTask.get("name"),
+                        subTask.get("description"),
+                        Long.parseLong(subTask.get("epicId")),
+                        Status.valueOf(subTask.get("status")),
+                        LocalDateTime.parse(subTask.get("startTime"), Task.DATE_TIME_FORMATTER),
+                        Duration.ofMinutes(Long.parseLong(subTask.get("duration"))));
                 createdSubTask.setId(Long.parseLong(subTask.get("id")));
                 fileBackedTaskManager.addSubTask(createdSubTask);
             }
