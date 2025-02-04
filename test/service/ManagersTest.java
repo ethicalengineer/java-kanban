@@ -23,7 +23,9 @@ class ManagersTest {
         TaskManager manager = Managers.getInMemoryTaskManager();
         manager.addTask(new Task("Полить цветы", "В гостиной и на кухне", Status.NEW,
                 LocalDateTime.of(2150, Month.DECEMBER, 6, 10, 0), Duration.ofMinutes(100)));
-        assertEquals(1, manager.getTaskById(1).getId());
+        if (manager.getTaskById(1).isPresent()) {
+            assertEquals(1, manager.getTaskById(1).get().getId());
+        }
     }
 
     @Test

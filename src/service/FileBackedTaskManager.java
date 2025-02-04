@@ -19,9 +19,10 @@ public class FileBackedTaskManager extends InMemoryTaskManager implements TaskMa
     // Tasks methods
 
     @Override
-    public void addTask(Task task) {
-        super.addTask(task);
+    public long addTask(Task task) {
+        long taskId = super.addTask(task);
         save();
+        return taskId;
     }
 
     @Override
@@ -45,9 +46,10 @@ public class FileBackedTaskManager extends InMemoryTaskManager implements TaskMa
     // SubTasks methods
 
     @Override
-    public void addSubTask(SubTask subTask) {
-        super.addSubTask(subTask);
+    public long addSubTask(SubTask subTask) {
+        long subTaskId = super.addSubTask(subTask);
         save();
+        return subTaskId;
     }
 
     @Override
@@ -71,9 +73,10 @@ public class FileBackedTaskManager extends InMemoryTaskManager implements TaskMa
     // Epics methods
 
     @Override
-    public void addEpic(Epic epic) {
-        super.addEpic(epic);
+    public long addEpic(Epic epic) {
+        long epicId = super.addEpic(epic);
         save();
+        return epicId;
     }
 
     @Override

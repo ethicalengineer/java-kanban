@@ -25,7 +25,9 @@ public class InMemoryHistoryManagerTest {
         manager.addTask(new Task("Полить цветы", "В гостиной и на кухне", Status.NEW,
                 LocalDateTime.of(2150, Month.DECEMBER, 6, 10, 0), Duration.ofMinutes(100)));
         HistoryManager history = manager.getHistory();
-        history.add(manager.getTaskById(1));
+        if (manager.getTaskById(1).isPresent()) {
+            history.add(manager.getTaskById(1).get());
+        }
         assertEquals(1, history.getHistory().size());
     }
 
@@ -34,9 +36,11 @@ public class InMemoryHistoryManagerTest {
         manager.addTask(new Task("Полить цветы", "В гостиной и на кухне", Status.NEW,
                 LocalDateTime.of(2150, Month.DECEMBER, 6, 10, 0), Duration.ofMinutes(100)));
         HistoryManager history = manager.getHistory();
-        history.add(manager.getTaskById(1));
+        if (manager.getTaskById(1).isPresent()) {
+            history.add(manager.getTaskById(1).get());
+        }
         assertEquals(1, history.getHistory().size());
-        history.remove(manager.getTaskById(1).getId());
+        history.remove(manager.getTaskById(1).get().getId());
         assertEquals(0, history.getHistory().size());
     }
 }

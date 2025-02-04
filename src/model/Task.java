@@ -8,13 +8,13 @@ import java.util.Objects;
 public class Task {
     public static final DateTimeFormatter DATE_TIME_FORMATTER = DateTimeFormatter.ofPattern("HH:mm dd.MM.yyyy");
 
-    private long id;
-    private String name;
-    private String description;
-    private Status status;
-    private final Type type;
-    private LocalDateTime startTime;
-    private Duration duration;
+    long id;
+    String name;
+    String description;
+    Status status;
+    final Type type;
+    LocalDateTime startTime;
+    Duration duration;
 
     public Task(String name, String description, Status status, LocalDateTime startTime, Duration duration) {
         this.name = name;

@@ -1,5 +1,6 @@
 package service;
 
+import exception.EntityNotFoundException;
 import model.Epic;
 import model.SubTask;
 import model.Task;
@@ -32,14 +33,14 @@ public class InMemoryTaskManager implements TaskManager {
     }
 
     @Override
-    public Task getTaskById(long id) {
-        Task task = tasks.get(id);
-        history.add(task);
+    public Optional<Task> getTaskById(long id) {
+        Optional<Task> task = Optional.ofNullable(tasks.get(id));
+        task.ifPresent(history::add);
         return task;
     }
 
     @Override
-    public void addTask(Task task) {
+    public long addTask(Task task) {
         if (isValidDataRange(task)) {
             final long id = getNewId();
             task.setId(id);
@@ -47,8 +48,9 @@ public class InMemoryTaskManager implements TaskManager {
             if (task.getStartTime() != null) {
                 prioritizedTasks.add(task);
             }
+            return task.getId();
         } else {
-            System.out.println("Пересечение оценки задачи " + task.getName());
+            return -1;
         }
     }
 
@@ -65,9 +67,11 @@ public class InMemoryTaskManager implements TaskManager {
 
     @Override
     public void removeTaskById(long id) {
-        prioritizedTasks.remove(getTaskById(id));
-        history.remove(id);
-        tasks.remove(id);
+        if (getTaskById(id).isPresent()) {
+            prioritizedTasks.remove(getTaskById(id).get());
+            history.remove(id);
+            tasks.remove(id);
+        }
     }
 
     // SubTasks methods
@@ -89,34 +93,39 @@ public class InMemoryTaskManager implements TaskManager {
     }
 
     @Override
-    public SubTask getSubTaskById(long id) {
-        SubTask subTask = subTasks.get(id);
-        history.add(subTask);
+    public Optional<SubTask> getSubTaskById(long id) {
+        Optional<SubTask> subTask = Optional.ofNullable(subTasks.get(id));
+        subTask.ifPresent(history::add);
         return subTask;
     }
 
     @Override
-    public void addSubTask(SubTask subTask) {
+    public long addSubTask(SubTask subTask) {
         if (isValidDataRange(subTask)) {
             final long id = getNewId();
             subTask.setId(id);
-            Epic updatedEpic = getEpicById(subTask.getEpicId());
-            updatedEpic.addSubTask(subTask);
-            updateEpic(updatedEpic);
+            Optional<Epic> updatedEpic = getEpicById(subTask.getEpicId());
+            if (updatedEpic.isPresent()) {
+                updatedEpic.get().addSubTask(subTask);
+                updateEpic(updatedEpic.get());
+            }
             subTasks.put(id, subTask);
             if (subTask.getStartTime() != null) {
                 prioritizedTasks.add(subTask);
             }
+            return subTask.getId();
         } else {
-            System.out.println("Пересечение оценки подзадачи " + subTask.getName());
+            return -1;
         }
     }
 
     @Override
     public void updateSubTask(SubTask subTask) {
-        Epic updatedEpic = getEpicById(subTask.getEpicId());
-        updatedEpic.updateSubTask(subTask);
-        updateEpic(updatedEpic);
+        Optional<Epic> updatedEpic = getEpicById(subTask.getEpicId());
+        if (updatedEpic.isPresent()) {
+            updatedEpic.get().updateSubTask(subTask);
+            updateEpic(updatedEpic.get());
+        }
         prioritizedTasks.remove(subTasks.get(subTask.getId()));
         subTasks.put(subTask.getId(), subTask);
         if (subTask.getStartTime() != null) {
@@ -128,12 +137,17 @@ public class InMemoryTaskManager implements TaskManager {
 
     @Override
     public void removeSubTaskById(long id) {
-        Epic updatedEpic = getEpicById(getSubTaskById(id).getEpicId());
-        updatedEpic.removeSubTask(id);
-        updateEpic(updatedEpic);
-        prioritizedTasks.remove(getSubTaskById(id));
-        history.remove(id);
-        subTasks.remove(id);
+        Optional<SubTask> subTask = getSubTaskById(id);
+        if (subTask.isPresent()) {
+            Optional<Epic> updatedEpic = getEpicById(subTask.get().getEpicId());
+            if (updatedEpic.isPresent()) {
+                updatedEpic.get().removeSubTask(id);
+                updateEpic(updatedEpic.get());
+            }
+            prioritizedTasks.remove(subTask.get());
+            history.remove(id);
+            subTasks.remove(id);
+        }
     }
 
     // Epics methods
@@ -152,40 +166,50 @@ public class InMemoryTaskManager implements TaskManager {
     }
 
     @Override
-    public Epic getEpicById(long id) {
-        Epic epic = epics.get(id);
-        history.add(epic);
+    public Optional<Epic> getEpicById(long id) {
+        Optional<Epic> epic = Optional.ofNullable(epics.get(id));
+        epic.ifPresent(history::add);
         return epic;
     }
 
     @Override
-    public void addEpic(Epic epic) {
+    public long addEpic(Epic epic) {
         final long id = getNewId();
         epic.setId(id);
         epics.put(id, epic);
+        return epic.getId();
     }
 
     @Override
     public void updateEpic(Epic epic) {
+        getEpicById(epic.getId())
+            .orElseThrow(() -> new EntityNotFoundException("Epic", id))
+            .getSubTasks()
+            .stream()
+            .peek(epic::addSubTask)
+            .close();
         epics.put(epic.getId(), epic);
     }
 
     @Override
     public void removeEpicById(long id) {
-        Epic removedEpic = getEpicById(id);
-        removedEpic.getSubTasks().stream().peek(subTask -> {
-            prioritizedTasks.remove(subTask);
-            history.remove(subTask.getId());
-            subTasks.remove(subTask.getId());
-        }).close();
-
+        Optional<Epic> removedEpic = getEpicById(id);
+        if (removedEpic.isPresent()) {
+            for (SubTask subTask : removedEpic.get().getSubTasks()) {
+                prioritizedTasks.remove(subTask);
+                history.remove(subTask.getId());
+                subTasks.remove(subTask.getId());
+            }
+        }
         history.remove(id);
         epics.remove(id);
     }
 
     @Override
     public ArrayList<SubTask> getAllSubTasksByEpicId(long id) {
-        return getEpicById(id).getSubTasks();
+        return getEpicById(id)
+                .orElseThrow(() -> new EntityNotFoundException("Epic", id))
+                .getSubTasks();
     }
 
     // Util

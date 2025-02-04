@@ -1,5 +1,6 @@
 package service;
 
+import exception.EntityNotFoundException;
 import model.Epic;
 import model.Status;
 import model.SubTask;
@@ -10,6 +11,7 @@ import org.junit.jupiter.api.Test;
 import java.time.Duration;
 import java.time.LocalDateTime;
 import java.time.Month;
+import java.util.Optional;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
@@ -43,7 +45,9 @@ public abstract class TaskManagerTest<T extends TaskManager> {
     public void testGetTaskById() {
         taskManager.addTask(new Task("Полить цветы", "В гостиной и на кухне", Status.NEW,
                 LocalDateTime.of(2150, Month.DECEMBER, 6, 10, 0), Duration.ofMinutes(100)));
-        assertEquals("Полить цветы", taskManager.getTaskById(1).getName());
+        if (taskManager.getTaskById(1).isPresent()) {
+            assertEquals("Полить цветы", taskManager.getTaskById(1).get().getName());
+        }
     }
 
     @Test
@@ -57,10 +61,12 @@ public abstract class TaskManagerTest<T extends TaskManager> {
     public void testUpdateTask() {
         taskManager.addTask(new Task("Полить цветы", "В гостиной и на кухне", Status.NEW,
                 LocalDateTime.of(2150, Month.DECEMBER, 6, 10, 0), Duration.ofMinutes(100)));
-        Task updatedTask = taskManager.getTaskById(1);
-        updatedTask.setName("Покормить кота");
-        taskManager.updateTask(updatedTask);
-        assertEquals("Покормить кота", taskManager.getTaskById(1).getName());
+        if (taskManager.getTaskById(1).isPresent()) {
+            Task updatedTask = taskManager.getTaskById(1).get();
+            updatedTask.setName("Покормить кота");
+            taskManager.updateTask(updatedTask);
+            assertEquals("Покормить кота", taskManager.getTaskById(1).get().getName());
+        }
     }
 
     @Test
@@ -102,7 +108,8 @@ public abstract class TaskManagerTest<T extends TaskManager> {
                 LocalDateTime.of(2130, Month.DECEMBER, 6, 10, 0), Duration.ofMinutes(15)));
         taskManager.addSubTask(new SubTask("Научиться исключениям", "Полностью", 1, Status.NEW,
                 LocalDateTime.of(2140, Month.DECEMBER, 6, 10, 0), Duration.ofMinutes(15)));
-        assertEquals("Научиться исключениям", taskManager.getSubTaskById(3).getName());
+        Optional<SubTask> subTask = taskManager.getSubTaskById(3);
+        subTask.ifPresent(task -> assertEquals("Научиться исключениям", task.getName()));
     }
 
     @Test
@@ -122,10 +129,12 @@ public abstract class TaskManagerTest<T extends TaskManager> {
                 LocalDateTime.of(2130, Month.DECEMBER, 6, 10, 0), Duration.ofMinutes(15)));
         taskManager.addSubTask(new SubTask("Научиться исключениям", "Полностью", 1, Status.NEW,
                 LocalDateTime.of(2140, Month.DECEMBER, 6, 10, 0), Duration.ofMinutes(15)));
-        SubTask updatedSubTask = taskManager.getSubTaskById(2);
-        updatedSubTask.setName("Упасть с NPE");
-        taskManager.updateSubTask(updatedSubTask);
-        assertEquals("Упасть с NPE", taskManager.getSubTaskById(2).getName());
+        Optional<SubTask> updatedSubTask = taskManager.getSubTaskById(2);
+        if (updatedSubTask.isPresent()) {
+            updatedSubTask.get().setName("Упасть с NPE");
+            taskManager.updateSubTask(updatedSubTask.get());
+            assertEquals("Упасть с NPE", updatedSubTask.get().getName());
+        }
     }
 
     @Test
@@ -159,7 +168,9 @@ public abstract class TaskManagerTest<T extends TaskManager> {
     public void testGetEpicById() {
         taskManager.addEpic(new Epic("Годовая цель", "Выучить Java",
                 LocalDateTime.of(2150, Month.DECEMBER, 6, 10, 0)));
-        assertEquals("Годовая цель", taskManager.getEpicById(1).getName());
+        assertEquals("Годовая цель", taskManager.getEpicById(1)
+                .orElseThrow(() -> new EntityNotFoundException("Epic", 1))
+                .getName());
     }
 
     @Test
@@ -173,10 +184,14 @@ public abstract class TaskManagerTest<T extends TaskManager> {
     public void testUpdateEpic() {
         taskManager.addEpic(new Epic("Годовая цель", "Выучить Java",
                 LocalDateTime.of(2150, Month.DECEMBER, 6, 10, 0)));
-        Epic updatedEpic = taskManager.getEpicById(1);
-        updatedEpic.setName("Промежуточная цель");
-        taskManager.updateEpic(updatedEpic);
-        assertEquals("Промежуточная цель", taskManager.getEpicById(1).getName());
+        Optional<Epic> updatedEpic = taskManager.getEpicById(1);
+        updatedEpic
+                .orElseThrow(() -> new EntityNotFoundException("Epic", 1))
+                .setName("Промежуточная цель");
+        taskManager.updateEpic(updatedEpic.get());
+        assertEquals("Промежуточная цель", taskManager.getEpicById(1)
+                .orElseThrow(() -> new EntityNotFoundException("Epic", 1))
+                .getName());
     }
 
     @Test

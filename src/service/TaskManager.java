@@ -6,15 +6,16 @@ import model.Task;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Optional;
 
 public interface TaskManager {
     ArrayList<Task> getAllTasks();
 
     void removeAllTasks();
 
-    Task getTaskById(long id);
+    Optional<Task> getTaskById(long id);
 
-    void addTask(Task task);
+    long addTask(Task task);
 
     void updateTask(Task task);
 
@@ -24,9 +25,9 @@ public interface TaskManager {
 
     void removeAllSubTasks();
 
-    SubTask getSubTaskById(long id);
+    Optional<SubTask> getSubTaskById(long id);
 
-    void addSubTask(SubTask subTask);
+    long addSubTask(SubTask subTask);
 
     void updateSubTask(SubTask subTask);
 
@@ -36,9 +37,9 @@ public interface TaskManager {
 
     void removeAllEpics();
 
-    Epic getEpicById(long id);
+    Optional<Epic> getEpicById(long id);
 
-    void addEpic(Epic epic);
+    long addEpic(Epic epic);
 
     void updateEpic(Epic epic);
 
