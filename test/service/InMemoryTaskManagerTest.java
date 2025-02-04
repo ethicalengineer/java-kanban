@@ -1,5 +1,6 @@
 package service;
 
+import exception.EntityNotFoundException;
 import model.Epic;
 import model.Status;
 import model.SubTask;
@@ -25,10 +26,14 @@ class InMemoryTaskManagerTest extends TaskManagerTest<InMemoryTaskManager> {
     void changeEpicStatusTest() {
         manager.addEpic(new Epic("Название", "Описание",
                 LocalDateTime.of(2150, Month.DECEMBER, 6, 10, 0)));
-        assertEquals(Status.NEW, manager.getEpicById(1).getStatus());
+        assertEquals(Status.NEW, manager.getEpicById(1)
+                .orElseThrow(() -> new EntityNotFoundException("Epic", 1))
+                .getStatus());
         manager.addSubTask(new SubTask("Название", "Описание", 1, Status.DONE,
                 LocalDateTime.of(2130, Month.DECEMBER, 6, 10, 0), Duration.ofMinutes(15)));
-        assertEquals(Status.DONE, manager.getEpicById(1).getStatus());
+        assertEquals(Status.DONE, manager.getEpicById(1)
+                .orElseThrow(() -> new EntityNotFoundException("Epic", 1))
+                .getStatus());
     }
 
     @Test
