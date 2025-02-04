@@ -17,15 +17,20 @@ public class HistoryHandler extends BaseHttpHandler implements HttpHandler {
 
     public void handle(HttpExchange h) throws IOException {
         String[] pathParts = h.getRequestURI().getPath().split("/");
+        String method = h.getRequestMethod();
 
         if (pathParts.length == 2 && pathParts[1].equals("history")) {
-            if (h.getRequestMethod().equals("GET")) {
-                super.sendText(h, 200, gson.toJson(historyManager.getHistory()));
+            if (method.equals("GET")) {
+                readHistoryHandler(h);
             } else {
-                super.sendText(h, 404, "Метод не реализован");
+                super.sendNotFound(h);
             }
         } else {
-            super.sendText(h, 404, "Метод не реализован");
+            super.sendNotFound(h);
         }
+    }
+
+    private void readHistoryHandler(HttpExchange h) throws IOException {
+        super.sendText(h, 200, gson.toJson(historyManager.getHistory()));
     }
 }

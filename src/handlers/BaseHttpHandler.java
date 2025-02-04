@@ -32,4 +32,22 @@ public class BaseHttpHandler {
         h.getResponseBody().write(resp);
         h.close();
     }
+
+    protected void sendNotFound(HttpExchange h) throws IOException {
+        String text = "Not Found";
+        byte[] resp = text.getBytes(StandardCharsets.UTF_8);
+        h.getResponseHeaders().add("Content-Type", "application/json;charset=utf-8");
+        h.sendResponseHeaders(404, resp.length);
+        h.getResponseBody().write(resp);
+        h.close();
+    }
+
+    protected void sendHasInteractions(HttpExchange h) throws IOException {
+        String text = "Заведение невозможно: пересечение по времени";
+        byte[] resp = text.getBytes(StandardCharsets.UTF_8);
+        h.getResponseHeaders().add("Content-Type", "application/json;charset=utf-8");
+        h.sendResponseHeaders(406, resp.length);
+        h.getResponseBody().write(resp);
+        h.close();
+    }
 }
